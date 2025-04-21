@@ -16,9 +16,8 @@
     </style>
 </head>
 <body>
-    <h1>Gestion de Projets</h1>
-    <h2>Rapport Global du Manager</h2>
-    <p>Généré le: {{ current_date }}</p>
+    <h1>Rapport d'activité de {{current_user.username}}</h1>
+    <p>Date: {{ current_date }}</p>
     
     <h3>Statistiques Globales</h3>
     <table>
@@ -108,7 +107,7 @@
     </table>
     
     <div class="footer">
-        © Gestion de Projets - Tous droits réservés
+        © CSE(Cellule de suivi) - Tous droits réservés
     </div>
 </body>
 </html>

@@ -136,60 +136,55 @@ def global_report():
 @login_required
 @manager_required
 def manager_global_report():
-    # Get projects with joined data to avoid N+1 queries
-    projects = db.session.query(Project).join(Domain).filter(
-        Project.manager_id == current_user.id
-    ).options(db.contains_eager(Project.domain)).all()
-
-    # Récupération des projets avec jointure pour éviter le problème N+1
-    projects = db.session.query(Project).join(Domain).filter(
-        Project.manager_id == current_user.id
-    ).options(db.contains_eager(Project.domain)).all()
-
-    # Calcul des statistiques par domaine avec la progression moyenne
+    # Récupérer les projets du manager
+    projects = Project.query.filter_by(manager_id=current_user.id).all()
+    
+    # Calculer les statistiques globales
+    stats = {
+        'total': len(projects),
+        'pending': len([p for p in projects if p.status == 'pending']),
+        'in_progress': len([p for p in projects if p.status == 'in_progress']),
+        'completed': len([p for p in projects if p.status == 'completed']),
+        'late': len([p for p in projects if p.status == 'late'])
+    }
+    
+    # Calculer les statistiques par domaine
+    domains = Domain.query.all()
     domain_stats = []
-    for domain in Domain.query.all():
+    for domain in domains:
         domain_projects = [p for p in projects if p.domain_id == domain.id]
-        if not domain_projects:
-            continue
-            
-        total_projects = len(domain_projects)
-        completed_projects = sum(1 for p in domain_projects if p.status == 'completed')
-        
-        # Calcul de la progression MOYENNE des projets du domaine
-        avg_progress = sum(p.progress for p in domain_projects) / total_projects
-        
-        domain_stats.append({
-            'domain': domain,
-            'total': total_projects,
-            'completed': completed_projects,
-            'progress': round(avg_progress, 1)  # Arrondi à 1 décimale
-        })
-
-    # Get history with project titles
-    history = db.session.query(ProjectHistory).join(Project).filter(
-        Project.manager_id == current_user.id
-    ).order_by(ProjectHistory.recorded_at.desc()).limit(10).all()
-
-    # Format dates properly before passing to template
+        if domain_projects:
+            domain_stats.append({
+                'domain': domain,
+                'total': len(domain_projects),
+                'completed': len([p for p in domain_projects if p.status == 'completed']),
+                'progress': sum(p.progress for p in domain_projects) / len(domain_projects)
+            })
+    
+    # Formater l'historique
     formatted_history = [{
+        'recorded_at': h.recorded_at.strftime('%Y-%m-%d %H:%M'),
         'project_title': h.project.title,
-        'status': h.status.replace('_', ' ').title(),
-        'progress': f"{h.progress}%",
-        'recorded_at': h.recorded_at.strftime('%Y-%m-%d %H:%M')
-    } for h in history]
-
+        'status': h.status,
+        'progress': f"{h.progress}%"
+    } for h in ProjectHistory.query.join(Project)
+        .filter(Project.manager_id == current_user.id)
+        .order_by(ProjectHistory.recorded_at.desc())
+        .limit(10)
+        .all()]
+    
+    # Formater les projets
     formatted_projects = [{
         'title': p.title,
         'domain_name': p.domain.name,
         'end_date': p.end_date.strftime('%Y-%m-%d'),
-        'status': p.status.replace('_', ' ').title(),
+        'status': p.status,
         'progress': f"{p.progress}%"
     } for p in projects]
-
-    # Generate PDF with properly formatted data
+    
+    # Générer le PDF
     pdf = generate_pdf_report(
-        template='manager_global_report.html',
+        template='reports/manager_global_report.html',
         stats=stats,
         domain_stats=domain_stats,
         history=formatted_history,

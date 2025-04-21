@@ -4,23 +4,7 @@
     <meta charset="UTF-8">
     <title>Rapport global</title>
     <style>
-        /* body { font-family: Arial, sans-serif; font-size: 12px; }
-        h2 { color: #333; }
-        .table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        .table th, .table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        .table th { background-color: #f2f2f2; }
-        .table-secondary { background-color: #f8f9fa; }
-        .table-primary { background-color: #cfe2ff; }
-        .badge { padding: 3px 6px; border-radius: 3px; font-size: 11px; }
-        .bg-success { background-color: #198754; color: white; }
-        .bg-primary { background-color: #0d6efd; color: white; }
-        .bg-danger { background-color: #dc3545; color: white; }
-        .bg-secondary { background-color: #6c757d; color: white; }
-        .progress { height: 20px; background-color: #e9ecef; margin-bottom: 0; }
-        .progress-bar { display: flex; align-items: center; justify-content: center; }
-        .bg-warning { background-color: #ffc107; }
-        .bg-info { background-color: #0dcaf0; }
-        .page-break { page-break-after: always; } */
+        
         @page {
             size: A4;
             margin: 1.5cm 1cm;
@@ -39,18 +23,36 @@
             width: 100%;
             text-align: center;
             border-bottom: 1px solid #ddd;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
+            padding: 15px 0 10px 0; /* Augmente le padding en haut et en bas */
+            margin: 20px 0; /* Ajoute des marges en haut et en bas */
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 20px; /* Espace entre le logo et le texte */
+        }
+    
+        .logo {
+            height: 40px;
+            margin-bottom: 0; /* Retire le margin-bottom précédent */
+        }
+        
+        .header-text {
+            text-align: left;
+        }
         #footer {
             position: running(footer);
             width: 100%;
             text-align: center;
             border-top: 1px solid #ddd;
-            padding-top: 5px;
+            padding: 10px 0 5px 0; /* Augmente le padding en haut */
             font-size: 10px;
             color: #666;
+            margin: 20px 0; /* Ajoute des marges en haut et en bas */
         }
         
         body { 
@@ -169,8 +171,13 @@
     <!-- <h2>Tableau de bord global</h2> -->
     <!-- Header -->
     <div id="header">
-        <div class="report-title">Rapport Global des Projets</div>
-        <div class="report-date">Généré le {{ current_date.strftime('%d/%m/%Y à %H:%M') }}</div>
+        <div class="header-content">
+            <img src="chemin/vers/logo.jpg" class="logo" alt="Logo">
+            <div class="header-text">
+                <div class="report-title">Rapport Global d'activité</div>
+                <div class="report-date">Date {{ current_date.strftime('%d/%m/%Y à %H:%M') }}</div>
+            </div>
+        </div>
     </div>
     
     <!-- Footer -->

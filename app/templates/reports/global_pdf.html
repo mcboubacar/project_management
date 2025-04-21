@@ -21,38 +21,58 @@
         #header {
             position: running(header);
             width: 100%;
-            text-align: center;
             border-bottom: 1px solid #ddd;
-            padding: 15px 0 10px 0; /* Augmente le padding en haut et en bas */
-            margin: 20px 0; /* Ajoute des marges en haut et en bas */
+            padding: 10px 0;
+            margin: 20px 0;
             display: flex;
             align-items: center;
-            justify-content: center;
-        }
-        
-        .header-content {
-            display: flex;
-            align-items: center;
-            gap: 20px; /* Espace entre le logo et le texte */
+            justify-content: space-between;
         }
     
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
         .logo {
-            height: 40px;
-            margin-bottom: 0; /* Retire le margin-bottom précédent */
+            height: 30px; /* Taille légèrement réduite pour mieux s'aligner avec le texte */
         }
         
         .header-text {
-            text-align: left;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
+        
+        .report-title {
+            font-size: 16px;
+            font-weight: bold;
+            line-height: 1.2;
+        }
+        
+        .report-date {
+            font-size: 11px;
+            color: #666;
+            line-height: 1.2;
+        }
+        
         #footer {
             position: running(footer);
             width: 100%;
-            text-align: center;
             border-top: 1px solid #ddd;
-            padding: 10px 0 5px 0; /* Augmente le padding en haut */
+            padding: 8px 0;
             font-size: 10px;
             color: #666;
-            margin: 20px 0; /* Ajoute des marges en haut et en bas */
+            margin: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .footer-left, .footer-right {
+            display: flex;
+            align-items: center;
         }
         
         body { 
@@ -171,19 +191,26 @@
     <!-- <h2>Tableau de bord global</h2> -->
     <!-- Header -->
     <div id="header">
-        <div class="header-content">
-            <img src="chemin/vers/logo.jpg" class="logo" alt="Logo">
+        <div class="header-left">
+            <img src="{{ url_for('static', filename='images/logo.jpg') }}" class="logo" alt="Logo">
             <div class="header-text">
-                <div class="report-title">Rapport Global d'activité</div>
-                <div class="report-date">Date {{ current_date.strftime('%d/%m/%Y à %H:%M') }}</div>
+                <span class="report-title">Rapport Global d'activité</span>
+                <span class="report-date">Généré le {{ current_date.strftime('%d/%m/%Y à %H:%M') }}</span>
             </div>
         </div>
     </div>
     
+    
     <!-- Footer -->
     <div id="footer">
-        Page <span class="page-number"></span> sur <span class="page-count"></span> |
-        © 2025 CSE(Cellule de suivi) | Confidential
+        <div class="footer-left">
+            Page <span class="page-number"></span> sur <span class="page-count"></span>
+        </div>
+        <div class="footer-right">
+            <div class="container text-center">
+                <p class="mb-0">© 2025 CSE(Cellule de suivi) - Tous droits réservés</p>
+            </div>
+        </div>
     </div>
     <!-- Section 1: Tableaux combinés -->
     <div>

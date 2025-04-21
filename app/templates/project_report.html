@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Rapport Projet</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        h1 { color: #2c3e50; }
+        h2 { color: #3498db; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th { background-color: #f2f2f2; text-align: left; padding: 8px; }
+        td { padding: 8px; border-bottom: 1px solid #ddd; }
+        .info-card { background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .footer { margin-top: 50px; font-size: 0.8em; text-align: center; }
+    </style>
+</head>
+<body>
+    <h1>Rapport Projet: {{ project.title }}</h1>
+    <p>Généré le: {{ current_date }}</p>
+    
+    <div class="info-card">
+        <h3>Informations Générales</h3>
+        <p><strong>Domaine:</strong> {{ project.domain }}</p>
+        <p><strong>Responsable:</strong> {{ project.manager }}</p>
+        <p><strong>Date de début:</strong> {{ project.start_date }}</p>
+        <p><strong>Date de fin:</strong> {{ project.end_date }}</p>
+        <p><strong>Statut:</strong> {{ project.status }}</p>
+        <p><strong>Progression:</strong> {{ project.progress }}</p>
+        <p><strong>Description:</strong> {{ project.description }}</p>
+    </div>
+    
+    <h3>Tâches</h3>
+    <table>
+        <tr>
+            <th>Titre</th>
+            <th>Date limite</th>
+            <th>Statut</th>
+        </tr>
+        {% for task in tasks %}
+        <tr>
+            <td>{{ task.title }}</td>
+            <td>{{ task.deadline }}</td>
+            <td>{{ task.status }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    
+    <h3>Historique du Projet</h3>
+    <table>
+        <tr>
+            <th>Date</th>
+            <th>Statut</th>
+            <th>Progression</th>
+        </tr>
+        {% for entry in history %}
+        <tr>
+            <td>{{ entry.recorded_at }}</td>
+            <td>{{ entry.status }}</td>
+            <td>{{ entry.progress }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    
+    <div class="footer">
+        © Gestion de Projets - Tous droits réservés
+    </div>
+</body>
+</html>

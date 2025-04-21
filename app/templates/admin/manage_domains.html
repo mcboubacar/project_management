@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Gestion des domaines{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Gestion des domaines</h2>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#domainModal">
+        <i class="bi bi-plus-circle"></i> Ajouter un domaine
+    </button>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Description</th>
+                <th>Nombre de projets</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for domain in domains %}
+            <tr>
+                <td>{{ domain.name }}</td>
+                <td>{{ domain.description|default('Aucune description', true) }}</td>
+                <td>{{ domain.projects.count() }}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" 
+                            data-bs-target="#editDomainModal{{ domain.id }}">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <a href="{{ url_for('admin.delete_domain', domain_id=domain.id) }}" 
+                       class="btn btn-sm btn-outline-danger" 
+                       onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce domaine ?')">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" 
+                            data-bs-target="#editDomainModal{{ domain.id }}">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <a href="{{ url_for('admin.delete_domain', domain_id=domain.id) }}" 
+                       class="btn btn-sm btn-outline-danger"
+                       onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce domaine ?')">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            
+            <!-- Edit Domain Modal -->
+            <div class="modal fade" id="editDomainModal{{ domain.id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Modifier le domaine</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form method="POST" action="{{ url_for('admin.edit_domain', domain_id=domain.id) }}">
+                            <div class="modal-body">
+                                {{ form.hidden_tag() }}
+                                <div class="mb-3">
+                                    <label for="name{{ domain.id }}" class="form-label">Nom</label>
+                                    <input type="text" class="form-control" id="name{{ domain.id }}" 
+                                           name="name" value="{{ domain.name }}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="description{{ domain.id }}" class="form-label">Description</label>
+                                    <textarea class="form-control" id="description{{ domain.id }}" 
+                                              name="description" rows="3">{{ domain.description }}</textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                <button type="submit" class="btn btn-primary">Enregistrer</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Add Domain Modal -->
+<div class="modal fade" id="domainModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajouter un nouveau domaine</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ url_for('admin.manage_domains') }}">
+                <div class="modal-body">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ form.name.label(class="form-label") }}
+                        {{ form.name(class="form-control") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.description.label(class="form-label") }}
+                        {{ form.description(class="form-control", rows=3) }}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    {{ form.submit(class="btn btn-primary") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

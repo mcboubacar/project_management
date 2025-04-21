@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}Tableau de bord global{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Tableau de bord global</h2>
+    <a href="{{ url_for('reports.global_report') }}" class="btn btn-success" target="_blank">
+        <i class="bi bi-file-earmark-pdf"></i> Rapport global
+    </a>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <h5 class="card-title">Total</h5>
+                <p class="card-text display-6">{{ stats.total }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-secondary">
+            <div class="card-body">
+                <h5 class="card-title">En attente</h5>
+                <p class="card-text display-6">{{ stats.pending }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <h5 class="card-title">En cours</h5>
+                <p class="card-text display-6">{{ stats.in_progress }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <h5 class="card-title">Terminés</h5>
+                <p class="card-text display-6">{{ stats.completed }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Projets par domaine</h5>
+                <canvas id="domainChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Statut des projets</h5>
+                <canvas id="statusChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3 class="mb-3">Tous les projets</h3>
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Titre</th>
+                <th>Domaine</th>
+                <th>Responsable</th>
+                <th>Date de fin</th>
+                <th>Statut</th>
+                <th>Progression</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for project in projects %}
+            <tr>
+                <td>{{ project.title }}</td>
+                <td>{{ project.domain.name }}</td>
+                <td>{{ project.manager.username }}</td>
+                <td>{{ project.end_date.strftime('%d/%m/%Y') }}</td>
+                <td>
+                    <span class="badge 
+                        {% if project.status == 'completed' %}bg-success
+                        {% elif project.status == 'in_progress' %}bg-primary
+                        {% elif project.status == 'late' %}bg-danger
+                        {% else %}bg-secondary{% endif %}">
+                        {{ project.status|replace('_', ' ')|title }}
+                    </span>
+                </td>
+                <td>
+                    <div class="progress" style="height: 20px;">
+                        <div class="progress-bar 
+                            {% if project.progress < 50 %}bg-warning
+                            {% elif project.progress < 80 %}bg-info
+                            {% else %}bg-success{% endif %}" 
+                            role="progressbar" 
+                            style="width: {{ project.progress }}%;" 
+                            aria-valuenow="{{ project.progress }}" 
+                            aria-valuemin="0" 
+                            aria-valuemax="100">
+                            {{ project.progress }}%
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Domain Chart
+    const domainCtx = document.getElementById('domainChart').getContext('2d');
+    const domainChart = new Chart(domainCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ domain_stats|map(attribute='domain.name')|list|tojson }},
+            datasets: [{
+                label: 'Projets par domaine',
+                data: {{ domain_stats|map(attribute='total')|list|tojson }},
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Status Chart
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    const statusChart = new Chart(statusCtx, {
+        type: 'pie',
+        data: {
+            labels: ['Terminés', 'En cours', 'En attente', 'En retard'],
+            datasets: [{
+                data: [
+                    {{ stats.completed }},
+                    {{ stats.in_progress }},
+                    {{ stats.pending }},
+                    {{ stats.late }}
+                ],
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.5)',
+                    'rgba(54, 162, 235, 0.5)',
+                    'rgba(201, 203, 207, 0.5)',
+                    'rgba(255, 99, 132, 0.5)'
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(201, 203, 207, 1)',
+                    'rgba(255, 99, 132, 1)'
+                ],
+                borderWidth: 1
+            }]
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

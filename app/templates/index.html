@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Accueil{% endblock %}
+
+{% block content %}
+<div class="jumbotron text-center py-5">
+    <h1 class="display-4">Bienvenue dans l'application de gestion de projets</h1>
+    <p class="lead">Gérez vos projets et tâches efficacement</p>
+    <hr class="my-4">
+    <p>Connectez-vous pour accéder à votre tableau de bord</p>
+    <a class="btn btn-primary btn-lg" href="{{ url_for('auth.login') }}" role="button">Connexion</a>
+</div>
+{% endblock %}

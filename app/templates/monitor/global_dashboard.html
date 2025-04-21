@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+
+{% block title %}Tableau de bord global{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Tableau de bord global</h2>
+    <a href="{{ url_for('reports.global_report') }}" class="btn btn-success" target="_blank">
+        <i class="bi bi-file-earmark-pdf"></i> Rapport global
+    </a>
+</div>
+
+<!-- Section 1: Graphiques -->
+<div class="row mb-4">
+    <!-- Projets par domaine et statut -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Projets par domaine et statut</h5>
+                <canvas id="domainStatusChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Projets par manager et statut -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Projets par manager et statut</h5>
+                <canvas id="managerStatusChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <!-- Graphique en barres des statuts -->
+    <div class="col-md-6 mx-auto">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Répartition par statut</h5>
+                <canvas id="statusBarChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 2: Tableaux combinés -->
+<div class="row mb-4">
+    <!-- Tableau combiné domaines et managers -->
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Synthèse par domaine et manager</h5>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th rowspan="2">Domaine</th>
+                                <th rowspan="2">Manager</th>
+                                <th colspan="3" class="text-center">Statut</th>
+                                <th rowspan="2">Total</th>
+                            </tr>
+                            <tr>
+                                <th>Terminés</th>
+                                <th>En cours</th>
+                                <th>En retard</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for domain in domain_manager_stats %}
+                            {% for manager in domain.managers %}
+                            <tr>
+                                {% if loop.first %}
+                                <td rowspan="{{ domain.managers|length }}">{{ domain.name }}</td>
+                                {% endif %}
+                                <td>{{ manager.name }}</td>
+                                <td>{{ manager.completed }}</td>
+                                <td>{{ manager.in_progress }}</td>
+                                <td>{{ manager.late }}</td>
+                                <td class="fw-bold">{{ manager.total }}</td>
+                            </tr>
+                            {% endfor %}
+                            <tr class="table-secondary fw-bold">
+                                <td colspan="2">Total {{ domain.name }}</td>
+                                <td>{{ domain.completed }}</td>
+                                <td>{{ domain.in_progress }}</td>
+                                <td>{{ domain.late }}</td>
+                                <td>{{ domain.total }}</td>
+                            </tr>
+                            {% endfor %}
+                            <tr class="table-primary fw-bold">
+                                <td colspan="2">Total général</td>
+                                <td>{{ stats.completed }}</td>
+                                <td>{{ stats.in_progress }}</td>
+                                <td>{{ stats.late }}</td>
+                                <td>{{ stats.total }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 3: Tableau détaillé -->
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Vue détaillée des projets</h5>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Manager</th>
+                        <th>Domaine</th>
+                        <th>Titre</th>
+                        <th>Statut</th>
+                        <th>Date de fin</th>
+                        <th>Progression</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for project in projects|sort(attribute='manager.username')|sort(attribute='domain.name')|sort(attribute='status') %}
+                    <tr>
+                        <td>{{ project.manager.username }}</td>
+                        <td>{{ project.domain.name }}</td>
+                        <td>{{ project.title }}</td>
+                        <td>
+                            <span class="badge 
+                                {% if project.status == 'completed' %}bg-success
+                                {% elif project.status == 'in_progress' %}bg-primary
+                                {% elif project.status == 'late' %}bg-danger
+                                {% else %}bg-secondary{% endif %}">
+                                {{ project.status|replace('_', ' ')|title }}
+                            </span>
+                        </td>
+                        <td>{{ project.end_date.strftime('%d/%m/%Y') }}</td>
+                        <td>
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar 
+                                    {% if project.progress < 50 %}bg-warning
+                                    {% elif project.progress < 80 %}bg-info
+                                    {% else %}bg-success{% endif %}" 
+                                    role="progressbar" 
+                                    style="width: {{ project.progress }}%;" 
+                                    aria-valuenow="{{ project.progress }}" 
+                                    aria-valuemin="0" 
+                                    aria-valuemax="100">
+                                    {{ project.progress }}%
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Graphique par domaine et statut
+    new Chart(
+        document.getElementById('domainStatusChart').getContext('2d'),
+        {
+            type: 'bar',
+            data: {
+                labels: {{ domains|map(attribute='name')|list|tojson }},
+                datasets: [
+                    {
+                        label: 'Terminés',
+                        data: {{ domains|map(attribute='completed')|list|tojson }},
+                        backgroundColor: 'rgba(75, 192, 192, 0.7)'
+                    },
+                    {
+                        label: 'En cours',
+                        data: {{ domains|map(attribute='in_progress')|list|tojson }},
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                    },
+                    {
+                        label: 'En retard',
+                        data: {{ domains|map(attribute='late')|list|tojson }},
+                        backgroundColor: 'rgba(255, 99, 132, 0.7)'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { stacked: true },
+                    y: { stacked: true, beginAtZero: true }
+                }
+            }
+        }
+    );
+
+    // Graphique par manager et statut
+    new Chart(
+        document.getElementById('managerStatusChart').getContext('2d'),
+        {
+            type: 'bar',
+            data: {
+                labels: {{ managers|map(attribute='name')|list|tojson }},
+                datasets: [
+                    {
+                        label: 'Terminés',
+                        data: {{ managers|map(attribute='completed')|list|tojson }},
+                        backgroundColor: 'rgba(75, 192, 192, 0.7)'
+                    },
+                    {
+                        label: 'En cours',
+                        data: {{ managers|map(attribute='in_progress')|list|tojson }},
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                    },
+                    {
+                        label: 'En retard',
+                        data: {{ managers|map(attribute='late')|list|tojson }},
+                        backgroundColor: 'rgba(255, 99, 132, 0.7)'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { stacked: true },
+                    y: { stacked: true, beginAtZero: true }
+                }
+            }
+        }
+    );
+
+    // Graphique des statuts (version réduite)
+    new Chart(
+    document.getElementById('statusBarChart').getContext('2d'),
+    {
+        type: 'bar',
+        data: {
+            labels: ['Terminés', 'En cours', 'En retard', 'En attente'],
+            datasets: [{
+                label: 'Nombre de projets',
+                data: [
+                    {{ stats.completed }},
+                    {{ stats.in_progress }},
+                    {{ stats.late }},
+                    {{ stats.pending }}
+                ],
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(201, 203, 207, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(201, 203, 207, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Nombre de projets'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Statut des projets'
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const total = {{ stats.total }};
+                            const value = context.raw;
+                            const percentage = (value / total * 100).toFixed(1);
+                            return `${value} projets (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    }
+);
+</script>
+{% endblock %}
+{% endblock %}

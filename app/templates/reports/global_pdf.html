@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Rapport global</title>
+    <style>
+        /* body { font-family: Arial, sans-serif; font-size: 12px; }
+        h2 { color: #333; }
+        .table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .table th, .table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .table th { background-color: #f2f2f2; }
+        .table-secondary { background-color: #f8f9fa; }
+        .table-primary { background-color: #cfe2ff; }
+        .badge { padding: 3px 6px; border-radius: 3px; font-size: 11px; }
+        .bg-success { background-color: #198754; color: white; }
+        .bg-primary { background-color: #0d6efd; color: white; }
+        .bg-danger { background-color: #dc3545; color: white; }
+        .bg-secondary { background-color: #6c757d; color: white; }
+        .progress { height: 20px; background-color: #e9ecef; margin-bottom: 0; }
+        .progress-bar { display: flex; align-items: center; justify-content: center; }
+        .bg-warning { background-color: #ffc107; }
+        .bg-info { background-color: #0dcaf0; }
+        .page-break { page-break-after: always; } */
+        @page {
+            size: A4;
+            margin: 1.5cm 1cm;
+            
+            @top-center {
+                content: element(header);
+            }
+            
+            @bottom-center {
+                content: element(footer);
+            }
+        }
+        
+        #header {
+            position: running(header);
+            width: 100%;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        #footer {
+            position: running(footer);
+            width: 100%;
+            text-align: center;
+            border-top: 1px solid #ddd;
+            padding-top: 5px;
+            font-size: 10px;
+            color: #666;
+        }
+        
+        body { 
+            font-family: Arial, sans-serif; 
+            font-size: 12px; 
+            margin: 0;
+            padding: 0;
+        }
+        
+        .content {
+            margin-top: 30px;
+        }
+        
+        h2 { 
+            color: #333; 
+            margin-top: 0;
+        }
+        
+        .table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-bottom: 20px; 
+            font-size: 11px;
+        }
+        
+        .table th, .table td { 
+            border: 1px solid #ddd; 
+            padding: 6px; 
+            text-align: left; 
+        }
+        
+        .table th { 
+            background-color: #f2f2f2; 
+            font-weight: bold;
+        }
+        
+        .table-secondary { 
+            background-color: #f8f9fa; 
+        }
+        
+        .table-primary { 
+            background-color: #cfe2ff; 
+        }
+        
+        .badge { 
+            padding: 3px 6px; 
+            border-radius: 3px; 
+            font-size: 11px; 
+            display: inline-block;
+        }
+        
+        .bg-success { 
+            background-color: #198754; 
+            color: white; 
+        }
+        
+        .bg-primary { 
+            background-color: #0d6efd; 
+            color: white; 
+        }
+        
+        .bg-danger { 
+            background-color: #dc3545; 
+            color: white; 
+        }
+        
+        .bg-secondary { 
+            background-color: #6c757d; 
+            color: white; 
+        }
+        
+        .progress { 
+            height: 18px; 
+            background-color: #e9ecef; 
+            margin-bottom: 0; 
+            width: 100%;
+        }
+        
+        .progress-bar { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 10px;
+        }
+        
+        .bg-warning { 
+            background-color: #ffc107; 
+        }
+        
+        .bg-info { 
+            background-color: #0dcaf0; 
+        }
+        
+        .page-break { 
+            page-break-after: always; 
+        }
+        
+        .logo {
+            height: 40px;
+            margin-bottom: 5px;
+        }
+        
+        .report-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .report-date {
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <!-- <h2>Tableau de bord global</h2> -->
+    <!-- Header -->
+    <div id="header">
+        <div class="report-title">Rapport Global des Projets</div>
+        <div class="report-date">Généré le {{ current_date.strftime('%d/%m/%Y à %H:%M') }}</div>
+    </div>
+    
+    <!-- Footer -->
+    <div id="footer">
+        Page <span class="page-number"></span> sur <span class="page-count"></span> |
+        © 2025 CSE(Cellule de suivi) | Confidential
+    </div>
+    <!-- Section 1: Tableaux combinés -->
+    <div>
+        <h3>Synthèse par domaine et manager</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th rowspan="2">Domaine</th>
+                    <th rowspan="2">Manager</th>
+                    <th colspan="3" style="text-align: center;">Statut</th>
+                    <th rowspan="2">Total</th>
+                </tr>
+                <tr>
+                    <th>Terminés</th>
+                    <th>En cours</th>
+                    <th>En retard</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for domain in domain_manager_stats %}
+                {% for manager in domain.managers %}
+                <tr>
+                    {% if loop.first %}
+                    <td rowspan="{{ domain.managers|length }}">{{ domain.name }}</td>
+                    {% endif %}
+                    <td>{{ manager.name }}</td>
+                    <td>{{ manager.completed }}</td>
+                    <td>{{ manager.in_progress }}</td>
+                    <td>{{ manager.late }}</td>
+                    <td style="font-weight: bold;">{{ manager.total }}</td>
+                </tr>
+                {% endfor %}
+                <tr style="background-color: #f8f9fa; font-weight: bold;">
+                    <td colspan="2">Total {{ domain.name }}</td>
+                    <td>{{ domain.completed }}</td>
+                    <td>{{ domain.in_progress }}</td>
+                    <td>{{ domain.late }}</td>
+                    <td>{{ domain.total }}</td>
+                </tr>
+                {% endfor %}
+                <tr style="background-color: #cfe2ff; font-weight: bold;">
+                    <td colspan="2">Total général</td>
+                    <td>{{ stats.completed }}</td>
+                    <td>{{ stats.in_progress }}</td>
+                    <td>{{ stats.late }}</td>
+                    <td>{{ stats.total }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Section 2: Tableau détaillé avec pagination -->
+    <div class="page-break"></div>
+    <h3>Vue détaillée des projets</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Manager</th>
+                <th>Domaine</th>
+                <th>Titre</th>
+                <th>Statut</th>
+                <th>Date de fin</th>
+                <th>Progression</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for project in projects|sort(attribute='manager.username')|sort(attribute='domain.name')|sort(attribute='status') %}
+            <tr>
+                <td>{{ project.manager.username }}</td>
+                <td>{{ project.domain.name }}</td>
+                <td>{{ project.title }}</td>
+                <td>
+                    <span class="badge 
+                        {% if project.status == 'completed' %}bg-success
+                        {% elif project.status == 'in_progress' %}bg-primary
+                        {% elif project.status == 'late' %}bg-danger
+                        {% else %}bg-secondary{% endif %}">
+                        {{ project.status|replace('_', ' ')|title }}
+                    </span>
+                </td>
+                <td>{{ project.end_date.strftime('%d/%m/%Y') }}</td>
+                <td>
+                    <div class="progress">
+                        <div class="progress-bar 
+                            {% if project.progress < 50 %}bg-warning
+                            {% elif project.progress < 80 %}bg-info
+                            {% else %}bg-success{% endif %}" 
+                            style="width: {{ project.progress }}%;">
+                            {{ project.progress }}%
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {% if loop.index % 30 == 0 %}
+            </tbody>
+            </table>
+            <div class="page-break"></div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Manager</th>
+                        <th>Domaine</th>
+                        <th>Titre</th>
+                        <th>Statut</th>
+                        <th>Date de fin</th>
+                        <th>Progression</th>
+                    </tr>
+                </thead>
+                <tbody>
+            {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+    <!-- Script pour la numérotation des pages -->
+    <script type="text/php">
+        if (isset($pdf)) {
+            $pdf->page_script('
+                $font = $fontMetrics->get_font("Arial, sans-serif");
+                $size = 10;
+                $pageNum = "Page " . $PAGE_NUM . " sur " . $PAGE_COUNT;
+                $pdf->text(530, 820, $pageNum, $font, $size);
+            ');
+        }
+    </script>
+</body>
+</html>

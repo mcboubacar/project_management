@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Rapport Global Manager</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        h1 { color: #2c3e50; }
+        h2 { color: #3498db; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th { background-color: #f2f2f2; text-align: left; padding: 8px; }
+        td { padding: 8px; border-bottom: 1px solid #ddd; }
+        .progress-bar { background-color: #e0e0e0; height: 20px; }
+        .progress { background-color: #3498db; height: 100%; display: block; }
+        .footer { margin-top: 50px; font-size: 0.8em; text-align: center; }
+    </style>
+</head>
+<body>
+    <h1>Gestion de Projets</h1>
+    <h2>Rapport Global du Manager</h2>
+    <p>Généré le: {{ current_date }}</p>
+    
+    <h3>Statistiques Globales</h3>
+    <table>
+        <tr>
+            <th>Total Projets</th>
+            <td>{{ stats.total }}</td>
+        </tr>
+        <tr>
+            <th>En Attente</th>
+            <td>{{ stats.pending }}</td>
+        </tr>
+        <tr>
+            <th>En Cours</th>
+            <td>{{ stats.in_progress }}</td>
+        </tr>
+        <tr>
+            <th>Terminés</th>
+            <td>{{ stats.completed }}</td>
+        </tr>
+        <tr>
+            <th>En Retard</th>
+            <td>{{ stats.late }}</td>
+        </tr>
+    </table>
+    
+    <h3>Projets par Domaine</h3>
+
+    <table>
+        <tr>
+            <th>Domaine</th>
+            <th>Total Projets</th>
+            <th>Terminés</th>
+            <th>Progression Moyenne</th>
+        </tr>
+        {% for domain in domain_stats %}
+        <tr>
+            <td>{{ domain.domain.name }}</td>
+            <td>{{ domain.total }}</td>
+            <td>{{ domain.completed }}</td>
+            <td>
+                <div class="progress-bar">
+                    <div class="progress" style="width: {{ domain.progress }}%">
+                        {{ domain.progress }}%
+                    </div>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    
+    <h3>Historique Récent</h3>
+    <table>
+        <tr>
+            <th>Date</th>
+            <th>Projet</th>
+            <th>Statut</th>
+            <th>Progression</th>
+        </tr>
+        {% for entry in history %}
+        <tr>
+            <td>{{ entry.recorded_at }}</td>
+            <td>{{ entry.project_title }}</td>
+            <td>{{ entry.status }}</td>
+            <td>{{ entry.progress }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    
+    <h3>Détail des Projets</h3>
+    <table>
+        <tr>
+            <th>Titre</th>
+            <th>Domaine</th>
+            <th>Date de Fin</th>
+            <th>Statut</th>
+            <th>Progression</th>
+        </tr>
+        {% for project in projects %}
+        <tr>
+            <td>{{ project.title }}</td>
+            <td>{{ project.domain_name }}</td>
+            <td>{{ project.end_date }}</td>
+            <td>{{ project.status }}</td>
+            <td>{{ project.progress }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    
+    <div class="footer">
+        © Gestion de Projets - Tous droits réservés
+    </div>
+</body>
+</html>
